@@ -3,9 +3,19 @@
   <div class="page-title">
     <div>
       <h2>Events</h2>
-      <div class="subtle">Create, update, or delete events</div>
+      <div class="subtle">
+        {% if q %}Showing results for “{{ q }}” — {% endif %}
+        {{ total }} total result{{ '' if total == 1 else 's' }}
+      </div>
     </div>
     <div class="actions">
+      <form method="get" class="searchbar">
+        <input name="q" value="{{ q }}" placeholder="Search title, venue, status…" />
+        {% if q %}
+          <a class="btn secondary" href="{{ url_for('events_list') }}">Clear</a>
+        {% endif %}
+        <button class="btn secondary" type="submit">Search</button>
+      </form>
       <a class="btn" href="{{ url_for('events_new') }}">＋ New Event</a>
     </div>
   </div>
@@ -32,9 +42,23 @@
           </td>
         </tr>
         {% else %}
-        <tr><td colspan="7" class="subtle">No events yet.</td></tr>
+        <tr><td colspan="7" class="subtle">No events found.</td></tr>
         {% endfor %}
       </tbody>
     </table>
+
+    <div class="pager">
+      <div class="pager-left">
+        <span class="subtle">Page {{ page }} of {{ total_pages }}</span>
+      </div>
+      <div class="pager-right">
+        {% if page > 1 %}
+          <a class="btn secondary" href="{{ url_for('events_list', page=page-1, q=q) }}">← Prev</a>
+        {% endif %}
+        {% if page < total_pages %}
+          <a class="btn secondary" href="{{ url_for('events_list', page=page+1, q=q) }}">Next →</a>
+        {% endif %}
+      </div>
+    </div>
   </div>
 {% endblock %}

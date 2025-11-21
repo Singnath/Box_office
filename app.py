@@ -100,12 +100,59 @@ def dashboard():
 @login_required
 def events_list():
     db = get_db()
-    events = db.execute("""
+
+    # Query params
+    q = (request.args.get("q") or "").strip()
+    try:
+        page = int(request.args.get("page", 1))
+    except ValueError:
+        page = 1
+    page = max(page, 1)
+    page_size = 8
+    offset = (page - 1) * page_size
+
+    # WHERE clause for case-insensitive search on title, venue, status
+    where = ""
+    params = []
+    if q:
+        like = f"%{q.lower()}%"
+        where = "WHERE lower(e.title) LIKE ? OR lower(v.name) LIKE ? OR lower(e.status) LIKE ?"
+        params.extend([like, like, like])
+
+    # Total count for pagination
+    total_sql = f"""
+        SELECT COUNT(*)
+        FROM events e
+        JOIN venues v ON v.venue_id = e.venue_id
+        {where}
+    """
+    total = db.execute(total_sql, tuple(params)).fetchone()[0]
+    total_pages = max(1, (total + page_size - 1) // page_size)
+    if page > total_pages:
+        page = total_pages
+        offset = (page - 1) * page_size
+
+    # Page of rows
+    list_sql = f"""
         SELECT e.event_id, e.title, e.starts_at, e.ends_at, e.status, v.name AS venue
-        FROM events e JOIN venues v ON v.venue_id = e.venue_id
-        ORDER BY e.event_id
-    """).fetchall()
-    return render_template("events_list.html", title="Events", events=events)
+        FROM events e
+        JOIN venues v ON v.venue_id = e.venue_id
+        {where}
+        ORDER BY e.starts_at DESC, e.event_id DESC
+        LIMIT ? OFFSET ?
+    """
+    rows = db.execute(list_sql, tuple(params) + (page_size, offset)).fetchall()
+
+    return render_template(
+        "events_list.html",
+        title="Events",
+        events=rows,
+        q=q,
+        page=page,
+        total_pages=total_pages,
+        total=total,
+        page_size=page_size
+    )
 
 @app.route("/events/new", methods=["GET","POST"])
 @login_required
