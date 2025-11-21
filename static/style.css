@@ -104,9 +104,15 @@
   gap: 10px; padding: 12px 0 4px;
 }
 .pager-right { display:flex; gap:10px; }
-.chart-wrap{ position:relative; min-height:140px }
-.chart-wrap.loading canvas{ opacity:.35; filter:blur(1px) }
-.chart-wrap .loading-text{
-  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+.chart-wrap { position:relative; min-height:140px }
+
+/* hide by default */
+.chart-wrap .loading-text { display:none; }
+
+/* show only while loading */
+.chart-wrap.loading canvas { opacity:.35; filter:blur(1px) }
+.chart-wrap.loading .loading-text {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
   font-size:.95rem; opacity:.7;
 }
