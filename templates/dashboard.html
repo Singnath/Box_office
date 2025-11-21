@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+{% block content %}
+  <div class="page-title">
+    <div>
+      <h2>Dashboard</h2>
+      <div class="subtle">Events per venue (top 10)</div>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <canvas id="chart" height="120" data-labels='{{ (labels|default([]))|tojson|safe }}' data-counts='{{ (counts|default([]))|tojson|safe }}'></canvas>
+    </div>
+    <div class="card">
+      <h3>Tips</h3>
+      <p class="subtle">Add, edit, or delete events from the Events page. Your changes update this chart on refresh.</p>
+      <ul>
+        <li>Total venues shown: {{ labels|length }}</li>
+        <li>Sample data seeded from Step A</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const el = document.getElementById('chart');
+    const labels = JSON.parse(el.dataset.labels || '[]');
+    const counts = JSON.parse(el.dataset.counts || '[]');
+    const ctx = el.getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Events',
+          data: counts,
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#9bb0d3' }, grid: { color: 'rgba(255,255,255,.06)' } },
+          y: { ticks: { color: '#9bb0d3' }, grid: { color: 'rgba(255,255,255,.06)' } }
+        }
+      }
+    });
+  </script>
+{% endblock %}

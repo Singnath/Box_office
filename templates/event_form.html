@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="page-title">
+    <div>
+      <h2>{{ 'Edit' if event else 'New' }} Event</h2>
+      <div class="subtle">Fill all required fields</div>
+    </div>
+    <div class="actions">
+      <a class="btn secondary" href="{{ url_for('events_list') }}">← Back</a>
+    </div>
+  </div>
+
+  <div class="card" style="max-width:720px;">
+    <form method="post">
+      <label>Venue</label>
+      <select name="venue_id" required>
+        {% for v in venues %}
+          <option value="{{ v.venue_id }}" {% if event and event.venue_id == v.venue_id %}selected{% endif %}>{{ v.name }}</option>
+        {% endfor %}
+      </select>
+
+      <label>Title</label>
+      <input name="title" required value="{{ event.title if event }}">
+
+      <div class="grid two">
+        <div>
+          <label>Starts at (YYYY-MM-DD HH:MM:SS)</label>
+          <input name="starts_at" required value="{{ event.starts_at if event }}">
+        </div>
+        <div>
+          <label>Ends at (YYYY-MM-DD HH:MM:SS)</label>
+          <input name="ends_at" required value="{{ event.ends_at if event }}">
+        </div>
+      </div>
+
+      <label>Status</label>
+      <input name="status" required value="{{ event.status if event else 'scheduled' }}">
+
+      <div class="actions" style="margin-top:14px;">
+        <button type="submit">Save</button>
+        <a class="btn secondary" href="{{ url_for('events_list') }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

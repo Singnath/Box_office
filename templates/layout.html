@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>{{ title or "Box Office" }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-inner container">
+      <div class="brand"><span class="dot"></span> Box Office</div>
+      {% if current_user.is_authenticated %}
+      <nav>
+        <a href="{{ url_for('dashboard') }}" class="{% if title=='Dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="{{ url_for('events_list') }}" class="{% if title=='Events' %}active{% endif %}">Events</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+
+  <div class="main container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash card">
+          {% for m in messages %}<div>{{ m }}</div>{% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

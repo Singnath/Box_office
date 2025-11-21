@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="page-title">
+    <div>
+      <h2>Sign in</h2>
+      <div class="subtle">Use the test account we’ll set next</div>
+    </div>
+  </div>
+
+  <div class="card" style="max-width:560px;">
+    <form method="post">
+      <label>Email</label>
+      <input type="email" name="email" required placeholder="user1@example.com">
+      <label>Password</label>
+      <input type="password" name="password" required placeholder="•••••••">
+      <div class="actions" style="margin-top:14px;">
+        <button type="submit">Sign in</button>
+        <a class="btn secondary" href="#">Need help?</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}
