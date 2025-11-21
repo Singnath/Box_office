@@ -1,5 +1,5 @@
 import os, sqlite3
-from flask import Flask, render_template, request, redirect, url_for, flash, g
+from flask import Flask, render_template, request, redirect, url_for, flash, g, jsonify
 from flask_login import (
     LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 )
@@ -152,6 +152,15 @@ def events_delete(event_id):
     db.execute("DELETE FROM events WHERE event_id=?", (event_id,))
     db.commit()
     return redirect(url_for("events_list"))
+
+@app.route("/api/health")
+def api_health():
+    try:
+        db = get_db()
+        db.execute("SELECT 1").fetchone()
+        return jsonify({"ok": True, "db": "ok"}), 200
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 if __name__ == "__main__":
     # For VS Code debugging, you can set breakpoints and run this file.
