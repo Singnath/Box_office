@@ -56,6 +56,25 @@ def load_user(user_id):
     return User.get_by_id(user_id)
 
 # ---- Routes ----
+from flask import Flask, render_template, request, redirect, url_for, flash, g, jsonify
+
+@app.route("/api/events_per_venue")
+@login_required
+def api_events_per_venue():
+    db = get_db()
+    rows = db.execute("""
+        SELECT v.name AS label, COUNT(e.event_id) AS n
+        FROM venues v
+        LEFT JOIN events e ON e.venue_id = v.venue_id
+        GROUP BY v.venue_id, v.name
+        ORDER BY n DESC, v.name ASC
+        LIMIT 10
+    """).fetchall()
+    return jsonify({
+        "labels": [r["label"] for r in rows],
+        "counts": [r["n"] for r in rows]
+    })
+
 @app.route("/login", methods=["GET","POST"])
 def login():
     if request.method == "POST":
