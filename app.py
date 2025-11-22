@@ -111,6 +111,24 @@ def events_ics(event_id):
         headers={"Content-Disposition": f"attachment; filename=event-{row['event_id']}.ics"}
     )
 
+@app.route("/events/<int:event_id>/duplicate", methods=["POST"])
+@login_required
+def events_duplicate(event_id):
+    db = get_db()
+    # Insert a copy; tweak title so it’s obvious
+    db.execute(
+        """
+        INSERT INTO events (title, starts_at, ends_at, status, venue_id)
+        SELECT title || ' (Copy)', starts_at, ends_at, status, venue_id
+        FROM events WHERE event_id = ?
+        """,
+        (event_id,),
+    )
+    new_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+    db.commit()
+    flash("Event duplicated. You can now edit the copy.")
+    return redirect(url_for("events_edit", event_id=new_id))
+
 @app.route("/api/events_per_venue")
 @login_required
 def api_events_per_venue():

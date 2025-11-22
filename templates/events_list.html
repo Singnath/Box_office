@@ -40,6 +40,9 @@
             <form method="post" action="{{ url_for('events_delete', event_id=e.event_id) }}" style="display:inline;">
               <button class="btn danger" onclick="return confirm('Delete this event?')">Delete</button>
             </form>
+            <form method="post" action="{{ url_for('events_duplicate', event_id=e.event_id) }}" style="display:inline;">
+              <button class="btn secondary" title="Duplicate this event">Duplicate</button>
+            </form>
           </td>
         </tr>
         {% else %}
