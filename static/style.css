@@ -116,3 +116,12 @@
   display:flex; align-items:center; justify-content:center;
   font-size:.95rem; opacity:.7;
 }
+/* chips + badges */
+.chips { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-left:8px }
+.chip { padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); font-size:.85rem }
+.chip.active { background:rgba(255,255,255,.12); }
+
+.badge { padding:3px 8px; border-radius:999px; font-size:.75rem; text-transform:capitalize; }
+.badge.scheduled { background:#2a6; color:#021; }
+.badge.completed { background:#2684ff33; color:#bcd4ff; border:1px solid #2a6bff55; }
+.badge.cancelled { background:#ff4d4d1a; color:#ffb3b3; border:1px solid #ff4d4d55; }

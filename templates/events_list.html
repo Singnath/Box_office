@@ -11,11 +11,15 @@
     <div class="actions">
       <form method="get" class="searchbar">
         <input name="q" value="{{ q }}" placeholder="Search title, venue, status…" />
-        {% if q %}
-          <a class="btn secondary" href="{{ url_for('events_list') }}">Clear</a>
-        {% endif %}
         <button class="btn secondary" type="submit">Search</button>
       </form>
+      <div class="chips">
+        {% set s = (status_filter or '') %}
+        <a class="chip {{ 'active' if not s }}" href="{{ url_for('events_list', q=q) }}">All</a>
+        <a class="chip {{ 'active' if s=='scheduled' }}" href="{{ url_for('events_list', q=q, status='scheduled') }}">Scheduled</a>
+        <a class="chip {{ 'active' if s=='completed' }}" href="{{ url_for('events_list', q=q, status='completed') }}">Completed</a>
+        <a class="chip {{ 'active' if s=='cancelled' }}" href="{{ url_for('events_list', q=q, status='cancelled') }}">Cancelled</a>
+      </div>
       <a class="btn" href="{{ url_for('events_new') }}">＋ New Event</a>
     </div>
   </div>
@@ -33,7 +37,9 @@
           <td>{{ e.venue }}</td>
           <td>{{ e.starts_at }}</td>
           <td>{{ e.ends_at }}</td>
-          <td>{{ e.status }}</td>
+          <td>
+            <span class="badge {{ e.status|lower }}">{{ e.status }}</span>
+          </td>
           <td class="actions">
             <a class="btn secondary" href="{{ url_for('events_edit', event_id=e.event_id) }}">Edit</a>
             <a class="btn secondary" href="{{ url_for('events_ics', event_id=e.event_id) }}">Add to Calender</a>

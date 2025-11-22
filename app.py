@@ -191,8 +191,8 @@ def dashboard():
 def events_list():
     db = get_db()
 
-    # Query params
     q = (request.args.get("q") or "").strip()
+    s = (request.args.get("status") or "").strip().lower()   # NEW: status filter
     try:
         page = int(request.args.get("page", 1))
     except ValueError:
@@ -201,20 +201,25 @@ def events_list():
     page_size = 8
     offset = (page - 1) * page_size
 
-    # WHERE clause for case-insensitive search on title, venue, status
-    where = ""
+    allowed_status = {"scheduled", "completed", "cancelled"}
+
+    where = []
     params = []
     if q:
         like = f"%{q.lower()}%"
-        where = "WHERE lower(e.title) LIKE ? OR lower(v.name) LIKE ? OR lower(e.status) LIKE ?"
+        where.append("(lower(e.title) LIKE ? OR lower(v.name) LIKE ? OR lower(e.status) LIKE ?)")
         params.extend([like, like, like])
+    if s in allowed_status:
+        where.append("lower(e.status) = ?")
+        params.append(s)
 
-    # Total count for pagination
+    where_sql = ("WHERE " + " AND ".join(where)) if where else ""
+
     total_sql = f"""
         SELECT COUNT(*)
         FROM events e
         JOIN venues v ON v.venue_id = e.venue_id
-        {where}
+        {where_sql}
     """
     total = db.execute(total_sql, tuple(params)).fetchone()[0]
     total_pages = max(1, (total + page_size - 1) // page_size)
@@ -222,12 +227,11 @@ def events_list():
         page = total_pages
         offset = (page - 1) * page_size
 
-    # Page of rows
     list_sql = f"""
         SELECT e.event_id, e.title, e.starts_at, e.ends_at, e.status, v.name AS venue
         FROM events e
         JOIN venues v ON v.venue_id = e.venue_id
-        {where}
+        {where_sql}
         ORDER BY e.starts_at DESC, e.event_id DESC
         LIMIT ? OFFSET ?
     """
@@ -238,6 +242,7 @@ def events_list():
         title="Events",
         events=rows,
         q=q,
+        status_filter=s,
         page=page,
         total_pages=total_pages,
         total=total,
