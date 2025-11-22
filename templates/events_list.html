@@ -36,6 +36,7 @@
           <td>{{ e.status }}</td>
           <td class="actions">
             <a class="btn secondary" href="{{ url_for('events_edit', event_id=e.event_id) }}">Edit</a>
+            <a class="btn secondary" href="{{ url_for('events_ics', event_id=e.event_id) }}">Add to Calender</a>
             <form method="post" action="{{ url_for('events_delete', event_id=e.event_id) }}" style="display:inline;">
               <button class="btn danger" onclick="return confirm('Delete this event?')">Delete</button>
             </form>

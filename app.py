@@ -58,6 +58,59 @@ def load_user(user_id):
 # ---- Routes ----
 from flask import Flask, render_template, request, redirect, url_for, flash, g, jsonify
 
+from flask import Response  # at top if not already imported
+from datetime import datetime
+
+def _fmt_ics_dt(s: str) -> str:
+    # Accept "YYYY-MM-DD HH:MM:SS" or ISO; return ICS "YYYYMMDDTHHMMSS"
+    try:
+        dt = datetime.fromisoformat(s.replace("Z",""))
+    except ValueError:
+        dt = datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
+    return dt.strftime("%Y%m%dT%H%M%S")
+
+@app.route("/events/<int:event_id>/ics")
+@login_required
+def events_ics(event_id):
+    db = get_db()
+    row = db.execute("""
+        SELECT e.event_id, e.title, e.starts_at, e.ends_at, e.status,
+               v.name AS venue
+        FROM events e
+        JOIN venues v ON v.venue_id = e.venue_id
+        WHERE e.event_id = ?
+    """, (event_id,)).fetchone()
+    if not row:
+        return "Not found", 404
+
+    now = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    dtstart = _fmt_ics_dt(row["starts_at"])
+    dtend   = _fmt_ics_dt(row["ends_at"])
+    summary = (row["title"] or "Event").replace("\n", " ")
+    location = (row["venue"] or "").replace("\n", " ")
+
+    ics = "\r\n".join([
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Box Office//EN",
+        "BEGIN:VEVENT",
+        f"UID:{row['event_id']}@boxoffice.local",
+        f"DTSTAMP:{now}",
+        f"DTSTART:{dtstart}",
+        f"DTEND:{dtend}",
+        f"SUMMARY:{summary}",
+        f"LOCATION:{location}",
+        "END:VEVENT",
+        "END:VCALENDAR",
+        ""
+    ])
+
+    return Response(
+        ics,
+        mimetype="text/calendar",
+        headers={"Content-Disposition": f"attachment; filename=event-{row['event_id']}.ics"}
+    )
+
 @app.route("/api/events_per_venue")
 @login_required
 def api_events_per_venue():
